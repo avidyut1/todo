@@ -1,0 +1,28 @@
+<div class="container body">
+  <div class="row">
+    <div class="col-md-12">
+      <input class="width100p new-todo" type="text" placeholder="Enter a todo">
+    </div>
+  </div>
+</div>
+<script id="example" type="text/x-handlebars-template">
+  <div class="row hover">
+  {{#if completed}}
+    <div class="col-md-11">
+      <p class="cross" id="{{id}}">{{ text }}</p>
+      <input type="text" value="{{text}}" id="edit{{id}}" class="dnone">
+    </div>
+    <div class="col-md-1">
+      <input class="check" type="checkbox" checked>
+    </div>
+  {{else}}
+    <div class="col-md-11">
+      <p id="{{id}}">{{ text }}</p>
+      <input type="text" value="{{text}}" id="edit{{id}}" class="dnone">
+    </div>
+    <div class="col-md-1">
+      <input class="check" type="checkbox">
+    </div>
+  {{/if}}
+  </div>
+</script>

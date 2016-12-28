@@ -1,0 +1,2 @@
+class Todoitem < ApplicationRecord
+end
