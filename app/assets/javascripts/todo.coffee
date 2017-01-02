@@ -118,8 +118,8 @@ $(document).ready(() ->
         #fetch mode
         appview.clear()
         appview.render()
-      else if (actions == 'kanban')
-        console.log('in kanban')
+      else if (actions == 'about')
+        console.log('in about')
   app_router = new AppRouter();
   Backbone.history.start();
   app_router.navigate('home', {trigger: true})
@@ -127,7 +127,7 @@ $(document).ready(() ->
   class Navbar extends Backbone.View
     events:
       'click .home': 'home'
-      'click .kanban': 'kanban'
+      'click .about': 'about'
     template: Handlebars.compile($("#nav").html())
     render: () ->
       @.$el.html(@template())
@@ -135,8 +135,8 @@ $(document).ready(() ->
       @
     home: ()->
       app_router.navigate('home', {trigger: true})
-    kanban: ()->
-      app_router.navigate('kanban', {trigger: true})
+    about: ()->
+      app_router.navigate('about', {trigger: true})
 
   navbar = new Navbar()
   navbar.render()
