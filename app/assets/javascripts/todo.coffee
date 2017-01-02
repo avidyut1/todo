@@ -9,6 +9,41 @@ $(document).ready(() ->
     urlRoot: '/todo'
     initialize: ()->
       console.log('new model init')
+
+  class SingleTodoView extends Backbone.View
+    initialize: (id) ->
+      @model = new Todoitem()
+      @model.set('id', id)
+      @model.fetch(success: (response)=>
+        @model = response
+        @.render()
+      )
+    render: () ->
+      new Todoitemview(@model).render('.body2')
+
+  class Appview extends Backbone.View
+    el: $('.body')
+    template: Handlebars.compile($('#entertodo').html())
+    events:
+      'keypress .new-todo': 'createOnEnter'
+    createOnEnter: (e) ->
+      e.stopPropagation()
+      if (e.which == 13 && $('.new-todo').val().trim())
+        val = $('.new-todo').val().trim()
+        nm = new Todoitem({'text': val})
+        nm.save(null, {
+          success: (model, response, options) =>
+            $('.new-todo').val('')
+            nm.id = response.id
+            new Todoitemview(nm).render()
+        })
+    clear: ()->
+      @.$el.html('');
+    render: () ->
+      @.$el.append(@.template())
+      todolistview = new Todolistview();
+      todolistview.render()
+
   ###
     Collections
    ###
@@ -22,6 +57,8 @@ $(document).ready(() ->
   ###
     Views
    ###
+
+
   class Todoitemview extends Backbone.View
     initialize: (model) ->
       @model = model
@@ -32,6 +69,7 @@ $(document).ready(() ->
       'dblclick p': 'edit'
       'keypress input': 'update'
       'click input.check': 'toggleCompleted'
+      'click p': 'view'
     edit: () ->
       @.$('#'+@.model.id).hide();
       @.$('#edit'+@.model.id).show();
@@ -47,9 +85,11 @@ $(document).ready(() ->
       @model.set('completed', !@model.get('completed'))
       @model.save()
       @.$el.html(@template(@.model.toJSON()))
-    render: () =>
+    view: () ->
+      app_router.navigate('todo/'+@model.get('id'), {trigger: true})
+    render: (selector) =>
       @.$el.html(@template(@.model.toJSON()))
-      $('.body').append(@.$el)
+      $(selector || '.body').append(@.$el)
       @
 
   class Todolistview extends Backbone.View
@@ -60,24 +100,44 @@ $(document).ready(() ->
           new Todoitemview(model).render()
       )
 
-  class Appview extends Backbone.View
-    el: $('.body')
-    events:
-      'keypress .new-todo': 'createOnEnter'
-    createOnEnter: (e) ->
-      if (e.which == 13 && $('.new-todo').val().trim())
-        val = $('.new-todo').val().trim()
-        nm = new Todoitem({'text': val})
-        nm.save(null, {
-          success: (model, response, options) =>
-            $('.new-todo').val('')
-            nm.id = response.id
-            new Todoitemview(nm).render()
-        })
-    render: () ->
-      todolistview = new Todolistview();
-      todolistview.render()
 
+  ###Router ###
   appview = new Appview()
-  appview.render()
+  class AppRouter extends Backbone.Router
+    routes:
+      "todo/:id": "getTodo",
+      "*actions": "defaultRoute"
+    getTodo: (id)->
+      $('.body').addClass('dnone')
+      $('.body2').removeClass('dnone').empty();
+      stv = new SingleTodoView(id)
+    defaultRoute: (actions) ->
+      if (actions == 'home')
+        $('.body').removeClass('dnone')
+        $('.body2').addClass('dnone');
+        #fetch mode
+        appview.clear()
+        appview.render()
+      else if (actions == 'kanban')
+        console.log('in kanban')
+  app_router = new AppRouter();
+  Backbone.history.start();
+  app_router.navigate('home', {trigger: true})
+
+  class Navbar extends Backbone.View
+    events:
+      'click .home': 'home'
+      'click .kanban': 'kanban'
+    template: Handlebars.compile($("#nav").html())
+    render: () ->
+      @.$el.html(@template())
+      $('.nav').append(@.$el)
+      @
+    home: ()->
+      app_router.navigate('home', {trigger: true})
+    kanban: ()->
+      app_router.navigate('kanban', {trigger: true})
+
+  navbar = new Navbar()
+  navbar.render()
 )

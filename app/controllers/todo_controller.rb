@@ -11,6 +11,10 @@ class TodoController < ApplicationController
       render json: {result: 'error'}
     end
   end
+  def show
+    td = Todoitem.find(params[:id])
+    render json: td
+  end
   def update
     td = Todoitem.find(params[:id])
     td.text = params[:text]
